@@ -9,18 +9,12 @@ param solutionName string = 'kmgs'
 @description('Optional. Azure location for the solution. If not provided, it defaults to the resource group location.')
 param location string = ''
 
-@maxLength(5)
-@description('Optional. A unique token for the solution. This is used to ensure resource names are unique for global resources. Defaults to a 5-character substring of the unique string generated from the subscription ID, resource group name, and solution name.')
-param solutionUniqueToken string = substring(uniqueString(subscription().id, resourceGroup().name, solutionName), 0, 5)
-
-var solutionSuffix= toLower(trim(replace(
+var solutionSuffix = toLower(trim(replace(
   replace(
-    replace(replace(replace(replace('${solutionName}${solutionUniqueToken}', '-', ''), '_', ''), '.', ''), '/', ''),
-    ' ',
-    ''
+    replace(replace(replace(replace(solutionName, '-', ''), '_', ''), '.', ''), '/', ''),
+    ' ', ''
   ),
-  '*',
-  ''
+  '*', ''
 )))
 
 @minLength(1)
@@ -961,6 +955,7 @@ module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.10.
     enableRBAC: true
     disableLocalAccounts: false
     publicNetworkAccess: 'Enabled'
+    nodeResourceGroup: 'AgenticAI_aks_aks-bagent'
     managedIdentities: {
       systemAssigned: true
     }
@@ -969,7 +964,7 @@ module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.10.
     enablePrivateCluster: false
     primaryAgentPoolProfiles: [
       {
-        name: 'agentpool'
+        name: 'bagentpool'
         vmSize: 'Standard_D4ds_v5'
         count: 2
         osType: 'Linux'
