@@ -25,7 +25,7 @@ spec:
       - name: aiservice
         image: {{ aiservice-imagepath }}
         ports:
-        - containerPort: 8080
+        - containerPort: 9001
         resources:
           limits:
             cpu: "2"
@@ -53,7 +53,7 @@ spec:
       - name: kernelmemory
         image: {{ kernelmemory-imagepath }}
         ports:
-        - containerPort: 8080
+        - containerPort: 9001
         resources:
           limits:
             cpu: "2"
