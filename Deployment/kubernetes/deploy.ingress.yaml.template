@@ -19,7 +19,7 @@ spec:
     service:
       name: frontapp-service
       port:
-        number: 5900
+        number: 80
   rules:
   - host: {{ fqdn }}
     http:
@@ -30,14 +30,14 @@ spec:
           service:
             name: aiservice-service
             port:
-              number: 9001
+              number: 80
       - path: /()(.*)
         pathType: Prefix
         backend:
           service:
             name: frontapp-service
             port:
-              number: 5900
+              number: 80
   tls:
   - hosts:
     - {{ fqdn }}
