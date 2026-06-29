@@ -1,10 +1,7 @@
 {
-	"Application:AIServices:GPT-4o-mini:Endpoint": "{gpt-4o-mini-endpoint}",
-	"Application:AIServices:GPT-4o-mini:Key": "{gpt-4o-mini-apikey}",
-	"Application:AIServices:GPT-4o-mini:ModelName": "{gpt-4o-mini-modelname}",
-	"Application:AIServices:GPT-4o:Endpoint": "{gpt-4o-endpoint}",
-	"Application:AIServices:GPT-4o:Key": "{gpt-4o-mini-apikey}",
-	"Application:AIServices:GPT-4o:ModelName": "{gpt-4o-mini-modelname}",
+	"Application:AIServices:GPT-5.2:Endpoint": "{gpt-5-2-endpoint}",
+	"Application:AIServices:GPT-5.2:Key": "{gpt-5-2-apikey}",
+	"Application:AIServices:GPT-5.2:ModelName": "{gpt-5-2-modelname}",
 	"Application:AIServices:TextEmbedding:Endpoint": "{textembedding-endpoint}",
 	"Application:AIServices:TextEmbedding:Key": "{textembedding-key}",
 	"Application:AIServices:TextEmbedding:ModelName": "{textembedding-modelname}",

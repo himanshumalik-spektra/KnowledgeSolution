@@ -54,7 +54,6 @@ namespace Microsoft.GS.DPS.API
             // Implementation of the file upload
             var documentId = await _kmClient.ImportDocumentAsync(documentStream, fileName, steps: [
                                     Constants.PipelineStepsExtract,
-                                    "keyword_extract",
                                     Constants.PipelineStepsSummarize,
                                     Constants.PipelineStepsPartition,
                                     Constants.PipelineStepsGenEmbeddings,

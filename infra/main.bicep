@@ -9,13 +9,14 @@ param solutionName string = 'kmgs'
 @description('Optional. Azure location for the solution. If not provided, it defaults to the resource group location.')
 param location string = ''
 
-var solutionSuffix = toLower(trim(replace(
+var solutionBase = toLower(trim(replace(
   replace(
     replace(replace(replace(replace(solutionName, '-', ''), '_', ''), '.', ''), '/', ''),
     ' ', ''
   ),
   '*', ''
 )))
+var solutionSuffix = '${solutionBase}${take(uniqueString(resourceGroup().id, solutionName), 6)}'
 
 @minLength(1)
 @description('Optional. GPT model deployment type:')
@@ -28,12 +29,12 @@ param gptModelDeploymentType string = 'GlobalStandard'
 @minLength(1)
 @description('Optional. Name of the GPT model to deploy:')
 @allowed([
-  'gpt-4.1-mini'
+  'gpt-5.2'
 ])
-param gptModelName string = 'gpt-4.1-mini'
+param gptModelName string = 'gpt-5.2'
 
 @description('Optional. Version of the GPT model to deploy.')
-param gptModelVersion string = '2025-04-14'
+param gptModelVersion string = '2025-12-11'
 
 @description('Optional. Capacity of the GPT model deployment:')
 @minValue(10)
@@ -89,7 +90,7 @@ param enableScalability bool = false
   azd: {
     type: 'location'
     usageName: [
-      'OpenAI.GlobalStandard.gpt4.1-mini,150'
+      'OpenAI.GlobalStandard.gpt-5.2,100'
       'OpenAI.GlobalStandard.text-embedding-3-large,100'
     ]
   }
@@ -412,7 +413,7 @@ module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-id
 
 // ========== Container Registry ========== //
 module avmContainerRegistry './modules/container-registry.bicep' = {
-  //name: format(deployment_param.resource_name_format_string, abbrs.containers.containerRegistry)
+  name: take('container-registry-${solutionSuffix}', 64)
   params: {
     acrName: 'cr${replace(solutionSuffix, '-', '')}'
     location: solutionLocation
@@ -440,6 +441,10 @@ module avmCosmosDB 'br/public:avm/res/document-db/database-account:0.15.0' = {
       {
         name: 'default'
         tag: 'default database'
+      }
+      {
+        name: 'DPS'
+        tag: 'application database'
       }
     ]
     tags: tags
@@ -530,11 +535,11 @@ module avmAppConfig 'br/public:avm/res/app-configuration/configuration-store:0.6
         value: enableMonitoring ? applicationInsights!.outputs.connectionString : ''
       }
       {
-        name: 'Application:AIServices:GPT-4o-mini:Endpoint'
+        name: 'Application:AIServices:GPT-5.2:Endpoint'
         value: avmOpenAi.outputs.endpoint
       }
       {
-        name: 'Application:AIServices:GPT-4o-mini:ModelName'
+        name: 'Application:AIServices:GPT-5.2:ModelName'
         value: gptModelDeployment.modelName
       }
       {
@@ -625,6 +630,18 @@ module avmAppConfig 'br/public:avm/res/app-configuration/configuration-store:0.6
         name: 'KernelMemory:Services:AzureQueues:Auth'
         value: 'AzureIdentity'
       }
+      {
+        name: 'KernelMemory:DocumentStorageType'
+        value: 'AzureBlobs'
+      }
+      {
+        name: 'KernelMemory:DataIngestion:DistributedOrchestration:QueueType'
+        value: 'AzureQueues'
+      }
+      {
+        name: 'KernelMemory:TextGeneratorType'
+        value: 'AzureOpenAIText'
+      }
     ]
 
     publicNetworkAccess: 'Enabled'
@@ -667,7 +684,7 @@ module avmAppConfigUpdated 'br/public:avm/res/app-configuration/configuration-st
 }
 
 // ========== Storage account module ========== //
-var storageAccountName = 'st${solutionSuffix}'
+var storageAccountName = take('st${solutionSuffix}', 24)
 module avmStorageAccount 'br/public:avm/res/storage/storage-account:0.20.0' = {
   name: take('avm.res.storage.storage-account.${storageAccountName}', 64)
   params : {
@@ -684,6 +701,11 @@ module avmStorageAccount 'br/public:avm/res/storage/storage-account:0.20.0' = {
       {
         principalId: userAssignedIdentity.outputs.principalId
         roleDefinitionIdOrName: 'Storage Blob Data Contributor'
+        principalType: 'ServicePrincipal'
+      }
+      {
+        principalId: userAssignedIdentity.outputs.principalId
+        roleDefinitionIdOrName: 'Storage Queue Data Contributor'
         principalType: 'ServicePrincipal'
       }
     ]
@@ -733,6 +755,10 @@ module avmStorageAccount 'br/public:avm/res/storage/storage-account:0.20.0' = {
       containers: [
         {
           name: 'data'
+          publicAccess: 'None'
+        }
+        {
+          name: 'smemory'
           publicAccess: 'None'
         }
       ]
@@ -955,7 +981,7 @@ module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.10.
     enableRBAC: true
     disableLocalAccounts: false
     publicNetworkAccess: 'Enabled'
-    nodeResourceGroup: 'AgenticAI_aks_aks-bagent'
+    nodeResourceGroup: 'rg-aks-nodes-${solutionSuffix}'
     managedIdentities: {
       systemAssigned: true
     }
@@ -1101,10 +1127,10 @@ output AZURE_OPENAI_SERVICE_ENDPOINT string = avmOpenAi.outputs.endpoint
 @description('Contains Azure Search Service Endpoint.')
 output AZ_SEARCH_SERVICE_ENDPOINT string = avmSearchSearchServices.name
 
-@description('Contains Azure GPT-4o Model Deployment Name.')
+@description('Contains Azure GPT-5.2 Model Deployment Name.')
 output AZ_GPT4O_MODEL_ID string = gptModelDeployment.deploymentName
 
-@description('Contains Azure GPT-4o Model Name.')
+@description('Contains Azure GPT-5.2 Model Name.')
 output AZ_GPT4O_MODEL_NAME string = gptModelDeployment.modelName
 
 @description('Contains Azure OpenAI Embedding Model Name.')

@@ -30,8 +30,8 @@ namespace Microsoft.GS.DPSHost.ServiceConfiguration
                 .AddSingleton<Microsoft.SemanticKernel.Kernel>(x =>
                 {
                     return Kernel.CreateBuilder()
-                                 .AddAzureOpenAIChatCompletion(deploymentName: builder.Configuration.GetSection("Application:AIServices:GPT-4o-mini")["ModelName"] ?? "",
-                                                              endpoint: builder.Configuration.GetSection("Application:AIServices:GPT-4o-mini")["Endpoint"] ?? "",
+                                 .AddAzureOpenAIChatCompletion(deploymentName: builder.Configuration.GetSection("Application:AIServices:GPT-5.2")["ModelName"] ?? "",
+                                                              endpoint: builder.Configuration.GetSection("Application:AIServices:GPT-5.2")["Endpoint"] ?? "",
                                                               credentials: AzureCredentialHelper.GetAzureCredential())
 
                                  .Build();

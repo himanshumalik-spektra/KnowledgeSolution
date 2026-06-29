@@ -12,10 +12,6 @@
           "Assembly": "Microsoft.KernelMemory.Core.dll",
           "Class": "Microsoft.KernelMemory.Handlers.TextExtractionHandler"
         },
-        "keyword_extract": {
-          "Assembly": "Microsoft.KernelMemory.Core.dll",
-          "Class": "Microsoft.KernelMemory.Handlers.KeywordExtractingHandler"
-        },
         "partition": {
           "Assembly": "Microsoft.KernelMemory.Core.dll",
           "Class": "Microsoft.KernelMemory.Handlers.TextPartitioningHandler"
